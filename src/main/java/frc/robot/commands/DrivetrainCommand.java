@@ -13,8 +13,9 @@ import frc.robot.RobotMap;
 
 public class DrivetrainCommand extends Command {
 
-  private double loffset, roffset;
-  private int lspeed, rspeed;
+  // private double loffset, roffset;
+  // private int lspeed, rspeed, diff;
+  private boolean quickTurn;
 
   public DrivetrainCommand() {
     // Use requires() here to declare subsystem dependencies
@@ -25,11 +26,12 @@ public class DrivetrainCommand extends Command {
   // Called just before this Command runs the first time
   @Override
   protected void initialize() {
+    quickTurn = false;
     Robot.DRIVETRAIN.tankDrive(0, 0);
-    loffset = 0;
-    roffset = 0;
-    lspeed = 0;
-    rspeed = 0;
+    // loffset = 0;
+    // roffset = 0;
+    // lspeed = 0;
+    // rspeed = 0;
   }
 
   // Called repeatedly when this Command is scheduled to run
@@ -37,22 +39,35 @@ public class DrivetrainCommand extends Command {
   protected void execute() {
     // if(Robot.oi.DRIVER.getRawAxis(RobotMap.DRIVE_TURN_AXIS)>-.002 && 
     //       Robot.oi.DRIVER.getRawAxis(RobotMap.DRIVE_TURN_AXIS)<.002 && 
-    //       Math.abs(Robot.oi.DRIVER.getRawAxis(RobotMap.DRIVE_FORWARD_AXIS))>.1){
+    //       Math.abs(Robot.oi.DRIVER.getRawAxis(RobotMap.DRIVE_FORWARD_AXIS))>.03){
     //   lspeed = Robot.DRIVETRAIN.getLeftEncoderSpeed();
-    //   rspeed = Robot.DRIVETRAIN.getRightEncoderSpeed();
+    //   rspeed = -Robot.DRIVETRAIN.getRightEncoderSpeed();
     //   if(lspeed > rspeed){
-    //     loffset -= .001;
-    //     roffset +=.001;
-    //   } else if(lspeed != rspeed) {
-    //     loffset += .001;
-    //     roffset -=.001;
+    //     diff = lspeed-rspeed;
+    //     diff /= lspeed;
+    //     loffset -= diff/20;
+    //     roffset += diff/20;
+    //   } else {
+    //     diff = rspeed-lspeed;
+    //     diff /= rspeed;
+    //     loffset += diff/20;
+    //     roffset -= diff/20;
     //   }
     // } else {
     //   loffset = 0;
     //   roffset = 0;
     // }
 
-    Robot.DRIVETRAIN.arcadeDrive(loffset-Robot.oi.DRIVER.getRawAxis(RobotMap.DRIVE_FORWARD_AXIS), roffset+Robot.oi.DRIVER.getRawAxis(RobotMap.DRIVE_TURN_AXIS));
+    // notForward = Math.abs(Robot.oi.DRIVER.getRawAxis(RobotMap.DRIVE_FORWARD_AXIS)) < .01;
+    
+    // double[] speeds = DriveControl.calculateDrive(loffset-Robot.oi.DRIVER.getRawAxis(RobotMap.DRIVE_FORWARD_AXIS), roffset+Robot.oi.DRIVER.getRawAxis(RobotMap.DRIVE_TURN_AXIS), quickTurn);
+    // Robot.DRIVETRAIN.tankDrive(speeds[0], speeds[1]);
+
+    quickTurn = Robot.oi.DRIVER.getRawButton(RobotMap.QUICK_TURN_BUTTON_PORT_1)
+                || Robot.oi.DRIVER.getRawButton(RobotMap.QUICK_TURN_BUTTON_PORT_2);
+
+    Robot.DRIVETRAIN.arcadeDrive(Robot.oi.DRIVER.getRawAxis(RobotMap.DRIVE_FORWARD_AXIS),
+                                  Robot.oi.DRIVER.getRawAxis(RobotMap.DRIVE_TURN_AXIS), quickTurn);
   }
 
   // Make this return true when this Command no longer needs to run execute()
